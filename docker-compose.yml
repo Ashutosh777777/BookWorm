@@ -1,0 +1,24 @@
+services:
+
+  ollama:
+    image: ollama/ollama
+    container_name: bookworm_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama   # persists downloaded models
+    # Pull the model on first startup
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.2 && wait"]
+
+  app:
+    build: .
+    container_name: bookworm_app
+    ports:
+      - "7860:7860"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434   # points to the ollama service
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
